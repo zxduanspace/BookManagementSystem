@@ -37,9 +37,23 @@ public class BookComponentTest {
         bookRepository.saveAll(List.of(book1, book2));
 
         MvcResult result = mvc.perform(get("/books"))
-                .andExpect(status().isOk()).andReturn();
+                .andExpect(status().isOk())
+                .andReturn();
         List<Book> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
 
         assertEquals(List.of(book1, book2), response);
+    }
+
+    @Test
+    public void should_return_book_when_call_get_book_by_id_api_given_exist_id() throws Exception {
+        Book savedBook = book1Builder.build();
+        bookRepository.save(savedBook);
+
+        MvcResult result = mvc.perform(get("/books/1"))
+                .andExpect(status().isOk())
+                .andReturn();
+        Book response = objectMapper.readValue(result.getResponse().getContentAsString(), Book.class);
+
+        assertEquals(savedBook, response);
     }
 }
