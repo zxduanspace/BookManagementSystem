@@ -16,6 +16,8 @@ import static com.zd.bookmanagementsystem.testutil.BookTestData.book2Builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,13 +61,45 @@ public class BookServiceTest {
     }
 
     @Test
-    public void should_save_book_when_create_book() {
+    public void should_save_book_success_when_create_book() {
         Book bookRequest = book1Builder.id(null).build();
         Book bookResponse = book1Builder.id(1L).build();
         when(bookRepository.save(bookRequest)).thenReturn(bookResponse);
 
         Book actualBook = bookService.createBook(bookRequest);
 
+        verify(bookRepository).save(bookResponse);
         assertEquals(bookResponse, actualBook);
+    }
+
+    @Test
+    public void should_return_null_when_update_book_given_non_exist_id() {
+        when(bookRepository.findById(1L)).thenReturn(Optional.empty());
+        Book bookRequest = book2Builder.build();
+
+        Book actualBook = bookService.updateBook(1L, bookRequest);
+
+        verify(bookRepository, times(0)).save(bookRequest);
+        assertNull(actualBook);
+    }
+
+    @Test
+    public void should_update_book_success_when_update_book_given_exist_id() {
+        Book savedBook = book1Builder.build();
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(savedBook));
+        Book bookRequest = Book.builder()
+                .id(1L)
+                .title("new-title")
+                .author("new-author")
+                .publicationYear("2024")
+                .isbn("456-789")
+                .build();
+
+        when(bookRepository.save(bookRequest)).thenReturn(bookRequest);
+
+        Book actualBook = bookService.updateBook(1L, bookRequest);
+
+        verify(bookRepository).save(bookRequest);
+        assertEquals(bookRequest, actualBook);
     }
 }
