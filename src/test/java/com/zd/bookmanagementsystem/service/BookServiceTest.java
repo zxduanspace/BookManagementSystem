@@ -15,7 +15,6 @@ import static com.zd.bookmanagementsystem.testutil.BookTestData.book1Builder;
 import static com.zd.bookmanagementsystem.testutil.BookTestData.book2Builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,7 +67,7 @@ public class BookServiceTest {
 
         Book actualBook = bookService.createBook(bookRequest);
 
-        verify(bookRepository).save(bookResponse);
+        verify(bookRepository).save(bookRequest);
         assertEquals(bookResponse, actualBook);
     }
 
@@ -101,5 +100,23 @@ public class BookServiceTest {
 
         verify(bookRepository).save(bookRequest);
         assertEquals(bookRequest, actualBook);
+    }
+
+    @Test
+    public void should_do_nothing_when_delete_book_given_non_exist_id() {
+        when(bookRepository.existsById(1L)).thenReturn(false);
+
+        bookService.deleteBook(1L);
+
+        verify(bookRepository, times(0)).deleteById(1L);
+    }
+
+    @Test
+    public void should_delete_book_success_when_delete_book_given_exist_id() {
+        when(bookRepository.existsById(1L)).thenReturn(true);
+
+        bookService.deleteBook(1L);
+
+        verify(bookRepository).deleteById(1L);
     }
 }

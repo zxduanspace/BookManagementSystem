@@ -2,7 +2,6 @@ package com.zd.bookmanagementsystem.service;
 
 import com.zd.bookmanagementsystem.model.Book;
 import com.zd.bookmanagementsystem.repository.BookRepository;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,5 +37,12 @@ public class BookService {
             bookRepository.save(existBook);
         }
         return existBook;
+    }
+
+    public void deleteBook(Long id) {
+        boolean existsById = bookRepository.existsById(id);
+        if (existsById) {
+            bookRepository.deleteById(id);
+        }
     }
 }

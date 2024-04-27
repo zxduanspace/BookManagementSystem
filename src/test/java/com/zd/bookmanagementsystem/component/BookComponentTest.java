@@ -1,6 +1,5 @@
 package com.zd.bookmanagementsystem.component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zd.bookmanagementsystem.model.Book;
@@ -19,8 +18,7 @@ import java.util.Optional;
 import static com.zd.bookmanagementsystem.testutil.BookTestData.book1Builder;
 import static com.zd.bookmanagementsystem.testutil.BookTestData.book2Builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -100,5 +98,18 @@ public class BookComponentTest {
         Book response = objectMapper.readValue(result.getResponse().getContentAsString(), Book.class);
 
         assertEquals(bookRequest, response);
+    }
+
+    @Test
+    public void should_return_no_content_when_delete_book_given_exist_id() throws Exception {
+        Book savedBook = book1Builder.build();
+        bookRepository.save(savedBook);
+
+        mvc.perform(delete("/books/1"))
+                .andExpect(status().isNoContent())
+                .andReturn();
+
+        Optional<Book> optionalBook = bookRepository.findById(1L);
+        assertEquals(Optional.empty(), optionalBook);
     }
 }
