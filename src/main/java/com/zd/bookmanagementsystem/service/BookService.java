@@ -23,4 +23,8 @@ public class BookService {
     public Book getBookById(Long id) {
         return bookRepository.findById(id).orElse(null);
     }
+
+    public Book createBook(Book bookRequest) {
+        return bookRepository.save(bookRequest);
+    }
 }

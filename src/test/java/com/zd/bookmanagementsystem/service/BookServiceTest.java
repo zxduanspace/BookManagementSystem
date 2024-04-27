@@ -15,6 +15,7 @@ import static com.zd.bookmanagementsystem.testutil.BookTestData.book1Builder;
 import static com.zd.bookmanagementsystem.testutil.BookTestData.book2Builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,5 +56,16 @@ public class BookServiceTest {
         Book actualBook = bookService.getBookById(1L);
 
         assertEquals(savedBook, actualBook);
+    }
+
+    @Test
+    public void should_save_book_when_create_book() {
+        Book bookRequest = book1Builder.id(null).build();
+        Book bookResponse = book1Builder.id(1L).build();
+        when(bookRepository.save(bookRequest)).thenReturn(bookResponse);
+
+        Book actualBook = bookService.createBook(bookRequest);
+
+        assertEquals(bookResponse, actualBook);
     }
 }
