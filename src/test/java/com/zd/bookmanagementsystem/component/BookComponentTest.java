@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static com.zd.bookmanagementsystem.testutil.BookTestData.book1Builder;
 import static com.zd.bookmanagementsystem.testutil.BookTestData.book2Builder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,9 +45,11 @@ public class BookComponentTest {
         MvcResult result = mvc.perform(get("/books"))
                 .andExpect(status().isOk())
                 .andReturn();
-        List<Book> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
+        List<Book> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+        });
 
-        assertEquals(List.of(book1, book2), response);
+        assertEquals(2, response.size());
+        assertThat(response).usingRecursiveComparison().ignoringFields("id").ignoringCollectionOrder().isEqualTo(List.of(book1, book2));
     }
 
     @Test
@@ -74,15 +77,15 @@ public class BookComponentTest {
                 .andReturn();
         Book response = objectMapper.readValue(result.getResponse().getContentAsString(), Book.class);
 
-        assertEquals(bookRequest, response);
+        assertThat(response).usingRecursiveComparison().ignoringFields("id").isEqualTo(bookRequest);
     }
 
     @Test
     public void should_return_created_when_call_update_book_api_given_exist_id() throws Exception {
-        Book savedBook = book1Builder.build();
-        bookRepository.save(savedBook);
+        Book book = book1Builder.build();
+        Book savedBook = bookRepository.save(book);
         Book bookRequest = Book.builder()
-                .id(1L)
+                .id(savedBook.getId())
                 .title("new-title")
                 .author("new-author")
                 .publicationYear("2024")
@@ -90,7 +93,7 @@ public class BookComponentTest {
                 .build();
         String content = objectMapper.writeValueAsString(bookRequest);
 
-        MvcResult result = mvc.perform(put("/books/1")
+        MvcResult result = mvc.perform(put("/books/" + savedBook.getId())
                         .content(content)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
